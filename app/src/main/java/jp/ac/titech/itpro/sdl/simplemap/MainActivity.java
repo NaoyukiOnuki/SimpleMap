@@ -10,6 +10,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -44,6 +46,8 @@ public class MainActivity extends AppCompatActivity implements
     };
     private final static int REQCODE_PERMISSIONS = 1111;
 
+    Location location;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,6 +71,16 @@ public class MainActivity extends AppCompatActivity implements
         locationRequest.setInterval(10000);
         locationRequest.setFastestInterval(5000);
         locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+
+        findViewById(R.id.location_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (location != null) {
+                    googleMap.animateCamera(CameraUpdateFactory
+                            .newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
+                }
+            }
+        });
     }
 
     @Override
@@ -119,10 +133,11 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onLocationChanged(Location location) {
-        Log.d(TAG, "onLocationChanged: " + location);
-        googleMap.animateCamera(CameraUpdateFactory
-                .newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
+    public void onLocationChanged(Location loc) {
+        Log.d(TAG, "onLocationChanged: " + loc);
+        location = loc;
+        //googleMap.animateCamera(CameraUpdateFactory
+        //        .newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
     }
 
     @Override

@@ -28,25 +28,23 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 
 public class MainActivity extends AppCompatActivity implements
-        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private final static String TAG = "MainActivity";
 
     private GoogleMap googleMap;
     private GoogleApiClient googleApiClient;
-    private LocationRequest locationRequest;
-    private boolean requestingLocationUpdate;
+    //private LocationRequest locationRequest;
+    //private boolean requestingLocationUpdate;
 
-    private enum UpdatingState {STOPPED, REQUESTING, STARTED}
+    //private enum UpdatingState {STOPPED, REQUESTING, STARTED}
 
-    private UpdatingState state = UpdatingState.STOPPED;
+    //private UpdatingState state = UpdatingState.STOPPED;
 
     private final static String[] PERMISSIONS = {
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_FINE_LOCATION
     };
     private final static int REQCODE_PERMISSIONS = 1111;
-
-    Location location;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,18 +65,15 @@ public class MainActivity extends AppCompatActivity implements
                 .addApi(LocationServices.API)
                 .build();
 
-        locationRequest = new LocationRequest();
-        locationRequest.setInterval(10000);
-        locationRequest.setFastestInterval(5000);
-        locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        //locationRequest = new LocationRequest();
+        //locationRequest.setInterval(10000);
+        //locationRequest.setFastestInterval(5000);
+        //locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
         findViewById(R.id.location_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (location != null) {
-                    googleMap.animateCamera(CameraUpdateFactory
-                            .newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
-                }
+                setCurrentLocation(true);
             }
         });
     }
@@ -94,17 +89,17 @@ public class MainActivity extends AppCompatActivity implements
     protected void onResume() {
         Log.d(TAG, "onResume");
         super.onResume();
-        if (state != UpdatingState.STARTED && googleApiClient.isConnected())
-            startLocationUpdate(true);
-        else
-            state = UpdatingState.REQUESTING;
+        //if (state != UpdatingState.STARTED && googleApiClient.isConnected())
+        //    startLocationUpdate(true);
+        //else
+        //    state = UpdatingState.REQUESTING;
     }
 
     @Override
     protected void onPause() {
         Log.d(TAG, "onPause");
-        if (state == UpdatingState.STARTED)
-            stopLocationUpdate();
+        //if (state == UpdatingState.STARTED)
+        //    stopLocationUpdate();
         super.onPause();
     }
 
@@ -118,8 +113,8 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         Log.d(TAG, "onConnected");
-        if (state == UpdatingState.REQUESTING)
-            startLocationUpdate(true);
+        //if (state == UpdatingState.REQUESTING)
+        //    startLocationUpdate(true);
     }
 
     @Override
@@ -132,13 +127,13 @@ public class MainActivity extends AppCompatActivity implements
         Log.d(TAG, "onConnectionFailed");
     }
 
-    @Override
-    public void onLocationChanged(Location loc) {
-        Log.d(TAG, "onLocationChanged: " + loc);
-        location = loc;
+    //@Override
+    //public void onLocationChanged(Location loc) {
+    //    Log.d(TAG, "onLocationChanged: " + loc);
+    //    location = loc;
         //googleMap.animateCamera(CameraUpdateFactory
         //        .newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
-    }
+    //}
 
     @Override
     public void onRequestPermissionsResult(int reqCode,
@@ -146,13 +141,13 @@ public class MainActivity extends AppCompatActivity implements
         Log.d(TAG, "onRequestPermissionsResult");
         switch (reqCode) {
         case REQCODE_PERMISSIONS:
-            startLocationUpdate(false);
+            setCurrentLocation(false);
             break;
         }
     }
 
-    private void startLocationUpdate(boolean reqPermission) {
-        Log.d(TAG, "startLocationUpdate: " + reqPermission);
+    private void setCurrentLocation(boolean reqPermission) {
+        Log.d(TAG, "getCurrentLocation: " + reqPermission);
         for (String permission : PERMISSIONS) {
             if (ContextCompat.checkSelfPermission(this, permission)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -164,13 +159,18 @@ public class MainActivity extends AppCompatActivity implements
                 return;
             }
         }
-        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
-        state = UpdatingState.STARTED;
+        Location loc = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+        if (loc != null) {
+            googleMap.animateCamera(CameraUpdateFactory
+                    .newLatLng(new LatLng(loc.getLatitude(), loc.getLongitude())));
+        }
+        //LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
+        //state = UpdatingState.STARTED;
     }
 
-    private void stopLocationUpdate() {
-        Log.d(TAG, "stopLocationUpdate");
-        LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
-        state = UpdatingState.STOPPED;
-    }
+    //private void stopLocationUpdate() {
+    //    Log.d(TAG, "stopLocationUpdate");
+    //    LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
+    //    state = UpdatingState.STOPPED;
+    //}
 }
